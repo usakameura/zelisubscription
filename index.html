@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>でんき安心パス | 優先対応サブスクリプション</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #080c18;
+    --bg2:      #0e1426;
+    --bg3:      #141c35;
+    --gold:     #f5a800;
+    --gold2:    #ffc94a;
+    --white:    #f0ede6;
+    --muted:    #7a8199;
+    --border:   rgba(245,168,0,0.18);
+    --radius:   12px;
+    --font-jp:  'Noto Sans JP', sans-serif;
+    --font-dis: 'Bebas Neue', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font-jp);
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── UTILITY ─── */
+  .hidden  { display: none !important; }
+  .page    { display: none; }
+  .page.active { display: block; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(8,12,24,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-dis);
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    cursor: pointer;
+  }
+  .nav-logo span { color: var(--white); }
+  nav .nav-links { display: flex; gap: 24px; align-items: center; }
+  nav a {
+    color: var(--muted); text-decoration: none; font-size: 13px;
+    font-weight: 500; transition: color .2s;
+  }
+  nav a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--gold); color: #000 !important;
+    padding: 8px 20px; border-radius: 6px; font-weight: 700 !important;
+  }
+  .nav-cta:hover { background: var(--gold2) !important; }
+  .nav-mypage-btn {
+    background: transparent; border: 1px solid var(--gold);
+    color: var(--gold) !important; padding: 7px 18px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+    font-family: var(--font-jp);
+  }
+  .nav-mypage-btn:hover { background: rgba(245,168,0,0.1); }
+
+  /* ─── HERO ─── */
+  #lp { padding-top: 80px; }
+
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 60px 24px 80px;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,168,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,168,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+  .hero-glow {
+    position: absolute; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(245,168,0,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,168,0,0.12); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 18px;
+    font-size: 12px; color: var(--gold); font-weight: 600;
+    letter-spacing: 0.1em; margin-bottom: 36px;
+    animation: fadeUp .6s ease both;
+  }
+  .hero-badge::before { content: '⚡'; }
+  .hero h1 {
+    font-family: var(--font-dis);
+    font-size: clamp(56px, 10vw, 110px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    animation: fadeUp .7s .1s ease both;
+  }
+  .hero h1 .accent { color: var(--gold); }
+  .hero-sub {
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--muted); margin-top: 24px;
+    line-height: 1.8; max-width: 520px;
+    animation: fadeUp .7s .2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 16px; margin-top: 44px; flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp .7s .3s ease both;
+  }
+  .btn-primary {
+    background: var(--gold); color: #000;
+    padding: 14px 36px; border-radius: 8px; border: none;
+    font-family: var(--font-jp); font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: all .2s; display: inline-block;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,168,0,0.35); }
+  .btn-ghost {
+    background: transparent; color: var(--white);
+    padding: 14px 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+    font-family: var(--font-jp); font-weight: 500; font-size: 15px;
+    cursor: pointer; transition: all .2s; text-decoration: none;
+    display: inline-block;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 72px;
+    animation: fadeUp .7s .4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-dis); font-size: 42px; color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.05em; }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    padding: 96px 24px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .section-tag {
+    font-size: 11px; letter-spacing: 0.18em; color: var(--gold);
+    font-weight: 700; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 900; line-height: 1.25;
+    margin-bottom: 16px;
+  }
+  .section-desc { color: var(--muted); font-size: 15px; line-height: 1.8; max-width: 560px; }
+
+  /* ─── FEATURES ─── */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; margin-top: 56px;
+  }
+  .feat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 36px 32px;
+    transition: border-color .3s, transform .3s;
+  }
+  .feat-card:hover { border-color: rgba(245,168,0,0.5); transform: translateY(-4px); }
+  .feat-icon {
+    width: 52px; height: 52px; border-radius: 10px;
+    background: rgba(245,168,0,0.1); display: flex; align-items: center;
+    justify-content: center; font-size: 24px; margin-bottom: 24px;
+  }
+  .feat-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .feat-card p { color: var(--muted); font-size: 14px; line-height: 1.75; }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0 24px;
+  }
+
+  /* ─── PLANS ─── */
+  #plans { background: var(--bg2); max-width: 100%; padding: 96px 24px; }
+  #plans > .inner { max-width: 1100px; margin: 0 auto; }
+  .plans-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; margin-top: 56px;
+  }
+  .plan-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 40px 32px;
+    position: relative; transition: transform .3s;
+  }
+  .plan-card:hover { transform: translateY(-4px); }
+  .plan-card.featured {
+    border-color: var(--gold);
+    background: linear-gradient(145deg, #141c35, #1a2240);
+  }
+  .plan-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: #000; font-size: 11px; font-weight: 700;
+    padding: 4px 16px; border-radius: 100px; letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .plan-name { font-size: 12px; letter-spacing: 0.15em; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
+  .plan-price {
+    font-family: var(--font-dis); font-size: 56px; color: var(--white);
+    line-height: 1;
+  }
+  .plan-price span { font-size: 16px; color: var(--muted); font-family: var(--font-jp); font-weight: 400; }
+  .plan-desc { color: var(--muted); font-size: 13px; margin-top: 8px; margin-bottom: 28px; line-height: 1.6; }
+  .plan-divider { border: none; border-top: 1px solid var(--border); margin: 0 0 24px; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .plan-features li {
+    font-size: 13px; color: var(--muted);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .plan-features li::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .plan-features li.inactive::before { content: '—'; color: #333; }
+  .plan-features li.inactive { color: #333; }
+  .plan-btn {
+    width: 100%; padding: 13px; border-radius: 8px; border: none;
+    font-family: var(--font-jp); font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: all .2s;
+  }
+  .plan-btn.outline {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--white);
+  }
+  .plan-btn.outline:hover { border-color: var(--gold); color: var(--gold); }
+  .plan-btn.solid {
+    background: var(--gold); color: #000;
+  }
+  .plan-btn.solid:hover { background: var(--gold2); box-shadow: 0 6px 20px rgba(245,168,0,0.3); }
+
+  /* ─── SIGNUP PAGE ─── */
+  #signup {
+    padding-top: 100px; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .signup-wrap {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 52px 48px;
+    width: 100%; max-width: 480px;
+  }
+  .signup-header { margin-bottom: 36px; }
+  .signup-header h2 { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+  .signup-header p { color: var(--muted); font-size: 14px; }
+  .plan-select-mini {
+    display: flex; gap: 10px; margin-bottom: 28px;
+  }
+  .plan-pill {
+    flex: 1; padding: 10px 8px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--muted); font-size: 12px; font-weight: 600;
+    text-align: center; cursor: pointer; transition: all .2s;
+  }
+  .plan-pill.active { border-color: var(--gold); color: var(--gold); background: rgba(245,168,0,0.08); }
+  .plan-pill-price { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .plan-pill.active .plan-pill-price { color: rgba(245,168,0,0.6); }
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em;
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 12px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg3);
+    color: var(--white); font-family: var(--font-jp); font-size: 14px;
+    outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+  .form-group select option { background: var(--bg3); }
+  .form-note { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 16px; }
+  .form-note a { color: var(--gold); }
+
+  /* ─── MYPAGE ─── */
+  #mypage { padding-top: 80px; min-height: 100vh; }
+  .mypage-inner { max-width: 800px; margin: 0 auto; padding: 48px 24px; }
+  .mypage-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 40px; flex-wrap: wrap; gap: 16px;
+  }
+  .mypage-greeting h2 { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+  .mypage-greeting p { color: var(--muted); font-size: 14px; }
+
+  .plan-status-card {
+    background: linear-gradient(135deg, #141c35, #1e2a4a);
+    border: 1px solid var(--gold); border-radius: 16px;
+    padding: 36px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 24px;
+  }
+  .plan-status-left {}
+  .plan-status-label { font-size: 11px; letter-spacing: 0.15em; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+  .plan-status-name { font-family: var(--font-dis); font-size: 40px; color: var(--white); }
+  .plan-status-price { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .plan-status-right { text-align: right; }
+  .plan-status-badge {
+    display: inline-block; background: rgba(245,168,0,0.15);
+    border: 1px solid var(--gold); color: var(--gold);
+    padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .plan-next-billing { font-size: 12px; color: var(--muted); }
+
+  .mypage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media(max-width: 600px) { .mypage-grid { grid-template-columns: 1fr; } }
+
+  .mypage-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+  }
+  .mypage-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mypage-card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+
+  .priority-btn {
+    width: 100%; padding: 14px; background: var(--gold); color: #000;
+    border: none; border-radius: 8px; font-family: var(--font-jp);
+    font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .priority-btn:hover { background: var(--gold2); box-shadow: 0 6px 20px rgba(245,168,0,0.3); }
+  .emergency-btn {
+    width: 100%; padding: 14px; background: transparent;
+    color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3);
+    border-radius: 8px; font-family: var(--font-jp);
+    font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .emergency-btn:hover { background: rgba(255,107,107,0.08); border-color: #ff6b6b; }
+
+  .benefits-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .benefits-list li {
+    font-size: 13px; display: flex; gap: 10px; align-items: center;
+    padding: 10px 14px; background: var(--bg3); border-radius: 8px;
+  }
+  .benefits-list li .icon { font-size: 18px; width: 28px; text-align: center; }
+  .benefits-list li .text { flex: 1; }
+  .benefits-list li .text strong { display: block; font-size: 13px; color: var(--white); margin-bottom: 2px; }
+  .benefits-list li .text span { font-size: 12px; color: var(--muted); }
+
+  .history-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .history-table th {
+    text-align: left; font-size: 11px; color: var(--muted);
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    letter-spacing: 0.05em; font-weight: 600;
+  }
+  .history-table td {
+    padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .status-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 700;
+  }
+  .status-done { background: rgba(100,220,100,0.12); color: #6dc96d; }
+  .status-scheduled { background: rgba(245,168,0,0.12); color: var(--gold); }
+
+  .logout-link {
+    display: block; text-align: center; margin-top: 32px;
+    font-size: 13px; color: var(--muted); cursor: pointer;
+    text-decoration: underline;
+  }
+  .logout-link:hover { color: var(--white); }
+
+  /* ─── BOOKING MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px; width: 100%; max-width: 460px;
+    transform: translateY(20px); transition: transform .3s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal h3 { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+  .modal p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; color: var(--muted);
+    font-size: 22px; cursor: pointer; transition: color .2s;
+  }
+  .modal-close:hover { color: var(--white); }
+  .modal { position: relative; }
+  .modal-success {
+    text-align: center; padding: 20px 0;
+  }
+  .modal-success .check { font-size: 56px; margin-bottom: 16px; }
+  .modal-success h4 { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+  .modal-success p { color: var(--muted); font-size: 14px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border); padding: 36px 24px;
+    text-align: center; color: var(--muted); font-size: 12px;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 300;
+    background: var(--gold); color: #000; padding: 14px 24px;
+    border-radius: 10px; font-weight: 700; font-size: 14px;
+    transform: translateY(20px); opacity: 0;
+    transition: all .3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media(max-width:600px) {
+    nav { padding: 16px 20px; }
+    .hero h1 { font-size: 52px; }
+    .hero-stats { gap: 28px; }
+    .signup-wrap { padding: 36px 24px; }
+    .plan-status-card { flex-direction: column; }
+    .plan-status-right { text-align: left; }
+    .mypage-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav id="nav">
+  <div class="nav-logo" onclick="showPage('lp')">⚡ <span>でんき安心パス</span></div>
+  <div class="nav-links">
+    <a href="#features" onclick="showPage('lp')">特典</a>
+    <a href="#plans" onclick="showPage('lp')">料金</a>
+    <button class="nav-mypage-btn" id="navMypageBtn" onclick="loadDemo(); showPage('mypage')">マイページ</button>
+    <a href="#" class="nav-cta" id="navSignupBtn" onclick="showPage('signup'); return false;">今すぐ登録</a>
+  </div>
+</nav>
+
+<!-- ─── LP ─── -->
+<div id="lp" class="page active">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-badge">会員限定 優先対応サービス</div>
+    <h1>電気工事<br><span class="accent">待たせない。</span></h1>
+    <p class="hero-sub">急なトラブルも、繁忙期も。<br>でんき安心パス会員は、常に優先的に工事枠をご案内します。</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showPage('signup')">無料で始める（月額980円〜）</button>
+      <button class="btn-ghost" onclick="loadDemo(); showPage('mypage')">デモを見る →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">48H</div>
+        <div class="stat-label">一般より早い予約受付</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24H</div>
+        <div class="stat-label">緊急対応保証</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5%</div>
+        <div class="stat-label">工事費割引（上位プラン）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-tag">MEMBER BENEFITS</div>
+    <h2 class="section-title">会員だけの<br>3つの特典</h2>
+    <p class="section-desc">万が一の電気トラブルも、予防的な工事も。会員なら安心してお任せいただけます。</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">📅</div>
+        <h3>優先予約枠</h3>
+        <p>一般公開より最大48時間早く予約枠へアクセス。繁忙期でも希望の日時を確保できます。</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <h3>緊急対応サポート</h3>
+        <p>電気トラブルが発生した際、会員専用の優先ルートでご連絡いただけます。翌日対応を目標に対処します。</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💰</div>
+        <h3>工事費割引・優待</h3>
+        <p>スタンダード以上のプランは工事費を5%割引。さらに年1回の無料点検もご利用いただけます。</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- PLANS -->
+  <div id="plans">
+    <div class="inner">
+      <div class="section-tag">PLANS</div>
+      <h2 class="section-title">シンプルな料金</h2>
+      <p class="section-desc">いつでも解約可能。まずは気軽にお試しください。</p>
+      <div class="plans-grid">
+
+        <!-- ライト -->
+        <div class="plan-card">
+          <div class="plan-name">LIGHT</div>
+          <div class="plan-price">980<span>円/月</span></div>
+          <div class="plan-desc">まず試してみたい方向けの入門プラン</div>
+          <hr class="plan-divider">
+          <ul class="plan-features">
+            <li>優先予約枠（48時間早期受付）</li>
+            <li>会員専用チャット相談</li>
+            <li class="inactive">緊急対応保証</li>
+            <li class="inactive">工事費5%割引</li>
+            <li class="inactive">年1回無料点検</li>
+          </ul>
+          <button class="plan-btn outline" onclick="selectPlan('ライト', 980)">このプランで登録</button>
+        </div>
+
+        <!-- スタンダード -->
+        <div class="plan-card featured">
+          <div class="plan-badge">人気 No.1</div>
+          <div class="plan-name">STANDARD</div>
+          <div class="plan-price">1,980<span>円/月</span></div>
+          <div class="plan-desc">電気工事を定期的に依頼する方に最適</div>
+          <hr class="plan-divider">
+          <ul class="plan-features">
+            <li>優先予約枠（48時間早期受付）</li>
+            <li>会員専用チャット相談</li>
+            <li>緊急対応保証（翌日目標）</li>
+            <li>工事費5%割引</li>
+            <li class="inactive">年1回無料点検</li>
+          </ul>
+          <button class="plan-btn solid" onclick="selectPlan('スタンダード', 1980)">このプランで登録</button>
+        </div>
+
+        <!-- プレミアム -->
+        <div class="plan-card">
+          <div class="plan-name">PREMIUM</div>
+          <div class="plan-price">3,980<span>円/月</span></div>
+          <div class="plan-desc">万全のサポートが必要な方・法人の方に</div>
+          <hr class="plan-divider">
+          <ul class="plan-features">
+            <li>優先予約枠（48時間早期受付）</li>
+            <li>会員専用チャット相談</li>
+            <li>緊急対応保証（当日〜翌日）</li>
+            <li>工事費5%割引</li>
+            <li>年1回無料点検付き</li>
+          </ul>
+          <button class="plan-btn outline" onclick="selectPlan('プレミアム', 3980)">このプランで登録</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 でんき安心パス　|　<a href="#" style="color:var(--muted)">利用規約</a>　<a href="#" style="color:var(--muted)">プライバシーポリシー</a></p>
+  </footer>
+</div>
+
+<!-- ─── SIGNUP ─── -->
+<div id="signup" class="page">
+  <div style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding: 100px 24px 60px;">
+    <div class="signup-wrap">
+      <div class="signup-header">
+        <h2>会員登録</h2>
+        <p>プランを選択して、かんたん登録。</p>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; color:var(--muted); font-weight:600; letter-spacing:0.05em; margin-bottom:10px;">プランを選択</div>
+        <div class="plan-select-mini">
+          <div class="plan-pill" id="pill-ライト" onclick="setPill('ライト')">
+            ライト<div class="plan-pill-price">¥980/月</div>
+          </div>
+          <div class="plan-pill active" id="pill-スタンダード" onclick="setPill('スタンダード')">
+            スタンダード<div class="plan-pill-price">¥1,980/月</div>
+          </div>
+          <div class="plan-pill" id="pill-プレミアム" onclick="setPill('プレミアム')">
+            プレミアム<div class="plan-pill-price">¥3,980/月</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>お名前</label>
+        <input type="text" id="inp-name" placeholder="山田 太郎">
+      </div>
+      <div class="form-group">
+        <label>電話番号</label>
+        <input type="tel" id="inp-tel" placeholder="090-0000-0000">
+      </div>
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" id="inp-email" placeholder="taro@example.com">
+      </div>
+
+      <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="doSignup()">
+        登録して決済へ進む
+      </button>
+      <p class="form-note">
+        ※ これはデモ画面です。実際の決済は発生しません。<br>
+        登録することで<a href="#">利用規約</a>および<a href="#">プライバシーポリシー</a>に同意したものとみなします。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MYPAGE ─── -->
+<div id="mypage" class="page">
+  <div class="mypage-inner">
+    <div class="mypage-header">
+      <div class="mypage-greeting">
+        <h2 id="my-greeting">こんにちは、山田様</h2>
+        <p>会員ステータスを確認できます</p>
+      </div>
+    </div>
+
+    <!-- プランステータス -->
+    <div class="plan-status-card">
+      <div class="plan-status-left">
+        <div class="plan-status-label">現在のプラン</div>
+        <div class="plan-status-name" id="my-plan-name">STANDARD</div>
+        <div class="plan-status-price" id="my-plan-price">¥1,980 / 月</div>
+      </div>
+      <div class="plan-status-right">
+        <div class="plan-status-badge">⚡ 会員有効</div>
+        <div class="plan-next-billing">次回請求日：2025年7月1日</div>
+      </div>
+    </div>
+
+    <div class="mypage-grid">
+      <!-- 優先予約 -->
+      <div class="mypage-card">
+        <h3>優先予約を入れる</h3>
+        <p>会員枠で工事日を確保できます。一般公開より48時間早く受付中です。</p>
+        <button class="priority-btn" onclick="openBookingModal()">
+          📅 優先予約フォーム
+        </button>
+      </div>
+      <!-- 緊急連絡 -->
+      <div class="mypage-card">
+        <h3>緊急対応の連絡</h3>
+        <p>電気トラブルが発生した際はこちら。優先ルートで担当者につながります。</p>
+        <button class="emergency-btn" onclick="showToast('緊急連絡を受け付けました。担当者よりご連絡します。')">
+          🚨 緊急連絡する
+        </button>
+      </div>
+    </div>
+
+    <!-- 特典一覧 -->
+    <div class="mypage-card" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">あなたの特典</h3>
+      <ul class="benefits-list" id="my-benefits">
+        <!-- JSで挿入 -->
+      </ul>
+    </div>
+
+    <!-- 工事履歴 -->
+    <div class="mypage-card">
+      <h3>工事履歴</h3>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>内容</th>
+            <th>金額</th>
+            <th>状態</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2025/06/01</td>
+            <td>コンセント増設（2口）</td>
+            <td>¥28,000</td>
+            <td><span class="status-tag status-done">完了</span></td>
+          </tr>
+          <tr>
+            <td>2025/07/10</td>
+            <td>分電盤点検・交換</td>
+            <td>¥65,000</td>
+            <td><span class="status-tag status-scheduled">予定</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="logout-link" onclick="doLogout()">ログアウト</div>
+  </div>
+</div>
+
+<!-- ─── 予約モーダル ─── -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="booking-form-area">
+      <h3>優先予約フォーム</h3>
+      <p>会員枠で工事日時をご指定ください。折り返しご確認の連絡をいたします。</p>
+      <div class="form-group">
+        <label>希望日</label>
+        <input type="date" id="bk-date">
+      </div>
+      <div class="form-group">
+        <label>希望時間帯</label>
+        <select id="bk-time">
+          <option value="">選択してください</option>
+          <option>午前（9:00〜12:00）</option>
+          <option>午後（13:00〜17:00）</option>
+          <option>夕方（17:00〜19:00）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>工事内容（任意）</label>
+        <input type="text" id="bk-content" placeholder="例：エアコン取り付け、コンセント増設など">
+      </div>
+      <button class="btn-primary" style="width:100%; margin-top:4px;" onclick="submitBooking()">予約を申し込む</button>
+    </div>
+    <div id="booking-success-area" class="modal-success hidden">
+      <div class="check">✅</div>
+      <h4>予約を受け付けました</h4>
+      <p>担当者より1営業日以内にご確認の連絡をいたします。</p>
+      <button class="btn-ghost" style="margin-top:24px; width:100%;" onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── STATE ───
+  let currentUser = null;
+  let selectedPlan = 'スタンダード';
+  const planPrices = { 'ライト': 980, 'スタンダード': 1980, 'プレミアム': 3980 };
+  const planBenefits = {
+    'ライト': [
+      { icon: '📅', title: '優先予約枠', desc: '一般より48時間早く受付' },
+      { icon: '💬', title: '会員専用チャット相談', desc: 'メッセージで気軽に相談' },
+    ],
+    'スタンダード': [
+      { icon: '📅', title: '優先予約枠', desc: '一般より48時間早く受付' },
+      { icon: '💬', title: '会員専用チャット相談', desc: 'メッセージで気軽に相談' },
+      { icon: '⚡', title: '緊急対応保証', desc: '翌日対応を目標に対処' },
+      { icon: '💰', title: '工事費5%割引', desc: 'すべての工事に適用' },
+    ],
+    'プレミアム': [
+      { icon: '📅', title: '優先予約枠', desc: '一般より48時間早く受付' },
+      { icon: '💬', title: '会員専用チャット相談', desc: 'メッセージで気軽に相談' },
+      { icon: '⚡', title: '緊急対応保証', desc: '当日〜翌日対応' },
+      { icon: '💰', title: '工事費5%割引', desc: 'すべての工事に適用' },
+      { icon: '🔍', title: '年1回無料点検', desc: '設備の安全確認' },
+    ],
+  };
+
+  // ─── PAGE ROUTING ───
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // ─── PLAN SELECT ───
+  function selectPlan(plan, price) {
+    selectedPlan = plan;
+    showPage('signup');
+    setPill(plan);
+  }
+
+  function setPill(plan) {
+    selectedPlan = plan;
+    document.querySelectorAll('.plan-pill').forEach(p => p.classList.remove('active'));
+    document.getElementById('pill-' + plan).classList.add('active');
+  }
+
+  // ─── SIGNUP ───
+  function doSignup() {
+    const name  = document.getElementById('inp-name').value.trim();
+    const tel   = document.getElementById('inp-tel').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    if (!name || !tel || !email) {
+      showToast('すべての項目を入力してください');
+      return;
+    }
+    currentUser = { name, tel, email, plan: selectedPlan };
+    localStorage.setItem('denkiSub_user', JSON.stringify(currentUser));
+    renderMypage();
+    showPage('mypage');
+    updateNav();
+    showToast('登録が完了しました！');
+  }
+
+  // ─── MYPAGE RENDER ───
+  function renderMypage() {
+    if (!currentUser) return;
+    const { name, plan } = currentUser;
+    document.getElementById('my-greeting').textContent = `こんにちは、${name.split(' ')[0]}様`;
+    document.getElementById('my-plan-name').textContent = plan.toUpperCase();
+    document.getElementById('my-plan-price').textContent = `¥${planPrices[plan].toLocaleString()} / 月`;
+
+    // benefits
+    const ul = document.getElementById('my-benefits');
+    ul.innerHTML = '';
+    planBenefits[plan].forEach(b => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="icon">${b.icon}</span><span class="text"><strong>${b.title}</strong><span>${b.desc}</span></span>`;
+      ul.appendChild(li);
+    });
+  }
+
+  // ─── DEMO ───
+  function loadDemo() {
+    if (!currentUser) {
+      currentUser = { name: '山田 太郎', tel: '090-0000-0000', email: 'taro@example.com', plan: 'スタンダード' };
+    }
+    renderMypage();
+    updateNav();
+  }
+
+  // ─── NAV ───
+  function updateNav() {
+    const loggedIn = !!currentUser;
+    document.getElementById('navSignupBtn').textContent = loggedIn ? '新規登録' : '今すぐ登録';
+  }
+
+  // ─── BOOKING MODAL ───
+  function openBookingModal() {
+    document.getElementById('bookingModal').classList.add('open');
+    document.getElementById('booking-form-area').classList.remove('hidden');
+    document.getElementById('booking-success-area').classList.add('hidden');
+    // set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('bk-date').min = today;
+  }
+  function closeModal() {
+    document.getElementById('bookingModal').classList.remove('open');
+  }
+  function submitBooking() {
+    const date = document.getElementById('bk-date').value;
+    const time = document.getElementById('bk-time').value;
+    if (!date || !time) { showToast('日付と時間帯を選択してください'); return; }
+    document.getElementById('booking-form-area').classList.add('hidden');
+    document.getElementById('booking-success-area').classList.remove('hidden');
+  }
+  document.getElementById('bookingModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ─── LOGOUT ───
+  function doLogout() {
+    currentUser = null;
+    localStorage.removeItem('denkiSub_user');
+    updateNav();
+    showPage('lp');
+  }
+
+  // ─── TOAST ───
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ─── INIT ───
+  (function init() {
+    const saved = localStorage.getItem('denkiSub_user');
+    if (saved) {
+      try {
+        currentUser = JSON.parse(saved);
+        renderMypage();
+        updateNav();
+      } catch(e) { localStorage.removeItem('denkiSub_user'); }
+    }
+  })();
+</script>
+</body>
+</html>
